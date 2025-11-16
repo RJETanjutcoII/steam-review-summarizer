@@ -1,0 +1,74 @@
+# --- Python general ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pkl
+*.db
+*.sqlite3
+
+# --- Virtual Environments ---
+venv/
+env/
+.venv/
+
+# --- Environment variables ---
+.env
+*.env
+
+# --- FastAPI / Uvicorn logs ---
+*.log
+
+# --- HuggingFace cache (very important) ---
+/home/*/.cache/huggingface/
+/Users/*/.cache/huggingface/
+/root/.cache/huggingface/
+.huggingface/
+.transformers/
+cache/
+hf_cache/
+huggingface/
+
+# This covers typical HF cache dirs:
+~/.cache/huggingface/
+~/.cache/torch/
+torch_cache/
+.cache/
+
+# --- PyTorch ---
+torch_cache/
+torch_extensions/
+*.pt
+*.bin
+*.pth
+
+# --- NLTK ---
+nltk_data/
+
+# --- Model files (never commit large weights) ---
+*.bin
+*.h5
+*.pb
+*.pt
+*.onnx
+
+# --- VSCode ---
+.vscode/
+.settings/
+
+# --- OS junk ---
+.DS_Store
+Thumbs.db
+
+# --- Node stuff (if you have frontend) ---
+node_modules/
+dist/
+build/
+*.map
+
+# --- Temporary files ---
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
