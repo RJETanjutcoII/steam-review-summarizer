@@ -1,0 +1,39 @@
+:root {
+  --steam-darkest: #171a21;
+  --steam-dark: #1b2838;
+  --steam-medium: #2a475e;
+  --steam-light: #66c0f4;
+  --steam-accent: #1a9fff;
+  --steam-success: #5ba32b;
+  --steam-error: #cd5c5c;
+  --steam-text: #c7d5e0;
+  --steam-text-dim: #8f98a0;
+}
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background-color: var(--steam-darkest);
+  color: var(--steam-text);
+  min-height: 100vh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: var(--steam-light);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--steam-accent);
+  text-decoration: underline;
+}

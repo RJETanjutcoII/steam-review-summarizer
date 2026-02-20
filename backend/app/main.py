@@ -1,18 +1,42 @@
+import os
+
 from fastapi import FastAPI, Query
-from steam_scraper import get_reviews
-from summarizer import summarize_reviews
+from fastapi.middleware.cors import CORSMiddleware
+
+from .summarizer import summarize_reviews_aggregate
+from .steam_scraper import search_games, get_reviews_by_id
 
 app = FastAPI()
 
-@app.get("/summarize")
-async def summarize(game_name: str = Query(..., description="Name of the game to analyze")):
-    pos_reviews, neg_reviews = get_reviews(game_name)
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173").split(",")
 
-    pos_summary = summarize_reviews(pos_reviews)
-    neg_summary = summarize_reviews(neg_reviews)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.get("/search")
+async def search(q: str = Query(..., min_length=1)):
+    """Autocomplete endpoint — proxies Steam's search API."""
+    return search_games(q)
+
+
+@app.get("/summarize")
+async def summarize(app_id: str = Query(..., min_length=1)):
+    """Main summarization endpoint. Takes an app_id from the search dropdown."""
+    pos_reviews, neg_reviews, game_name = get_reviews_by_id(app_id)
+    summary = summarize_reviews_aggregate(pos_reviews, neg_reviews)
 
     return {
         "game": game_name,
-        "positive_summary": pos_summary,
-        "negative_summary": neg_summary
+        "app_id": app_id,
+        "summary": summary,
     }
+
+
+@app.get("/")
+async def root():
+    return {"status": "ok"}

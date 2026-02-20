@@ -1,50 +1,70 @@
 # app/summarizer.py
-from typing import List
-from transformers import pipeline
+# Orchestrator: ties together analysis (ML) and generation (LLM) pipelines.
 
-# Load once at import time so we don't reload per request
-# You can swap the model later for something smaller/faster.
-_SUMMARIZER = pipeline(
-    "summarization",
-    model="facebook/bart-large-cnn",
-    tokenizer="facebook/bart-large-cnn",
-    device_map="auto",       # uses GPU if available, CPU if not
-)
+from .analysis import extract_sentences, cluster_sentences, extract_cluster_topic
+from .generator import generate_summary
 
 
-def build_corpus(reviews: List[str], max_chars: int = 4000) -> str:
+def summarize_reviews_aggregate(pos_reviews: list, neg_reviews: list) -> dict:
     """
-    Join multiple reviews into a single text block, truncated to max_chars
-    so we don't blow up the model context.
+    Hybrid summarization pipeline:
+    1. Extract and filter opinion sentences from reviews
+    2. Cluster sentences by semantic similarity (sentence embeddings)
+    3. Identify each cluster's topic via TF-IDF
+    4. Generate a clean summary sentence per cluster via LLM
     """
-    if not reviews:
-        return ""
+    result = {
+        "praised": [],
+        "criticized": [],
+    }
 
-    joined = " ".join(reviews)
-    if len(joined) > max_chars:
-        joined = joined[:max_chars]
+    pos_sentences = extract_sentences(pos_reviews)
+    neg_sentences = extract_sentences(neg_reviews)
 
-    return joined
+    print(f"Extracted {len(pos_sentences)} positive, {len(neg_sentences)} negative sentences")
 
+    # Cluster and summarize positive themes
+    if len(pos_sentences) >= 4:
+        # More sentences = more clusters to discover more topics
+        n_pos = max(5, min(8, len(pos_sentences) // 20))
+        pos_clusters = cluster_sentences(pos_sentences, n_pos)
 
-def summarize_reviews(
-    reviews: List[str],
-    max_length: int = 150,
-    min_length: int = 50,
-) -> str:
-    """
-    Summarize a list of review texts into a single short summary.
-    """
-    corpus = build_corpus(reviews)
-    if not corpus.strip():
-        return "No reviews available to summarize."
+        # Aim for 3-5 points based on sentence volume
+        max_points = 3 if len(pos_sentences) < 30 else (5 if len(pos_sentences) >= 60 else 4)
 
-    result = _SUMMARIZER(
-        corpus,
-        max_length=max_length,
-        min_length=min_length,
-        do_sample=False,      # deterministic output
-    )
+        seen = set()
+        # Try more clusters than max_points, since some may get filtered
+        # out for being too vague. We stop once we have enough good ones.
+        for cluster_sents, size in pos_clusters:
+            if len(result["praised"]) >= max_points:
+                break
+            keywords = extract_cluster_topic(cluster_sents, pos_clusters)
+            summary = generate_summary(cluster_sents, keywords, "positive")
+            if summary and summary not in seen:
+                seen.add(summary)
+                result["praised"].append(summary)
 
-    # HF pipelines return a list of dicts like [{"summary_text": "..."}]
-    return result[0]["summary_text"]
+    # Cluster and summarize negative themes
+    if len(neg_sentences) >= 4:
+        n_neg = max(3, min(8, len(neg_sentences) // 10))
+        neg_clusters = cluster_sentences(neg_sentences, n_neg)
+
+        max_points = 3 if len(neg_sentences) < 20 else (5 if len(neg_sentences) >= 40 else 4)
+
+        seen = set()
+        for cluster_sents, size in neg_clusters:
+            if len(result["criticized"]) >= max_points:
+                break
+            keywords = extract_cluster_topic(cluster_sents, neg_clusters)
+            summary = generate_summary(cluster_sents, keywords, "negative")
+            if summary and summary not in seen:
+                seen.add(summary)
+                result["criticized"].append(summary)
+
+    # Fallbacks
+    if not result["praised"]:
+        result["praised"] = ["No consistent praise found."]
+    if not result["criticized"]:
+        result["criticized"] = ["No major criticisms."]
+
+    return result
