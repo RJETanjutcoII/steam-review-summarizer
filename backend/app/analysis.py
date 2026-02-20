@@ -1,23 +1,27 @@
 # app/analysis.py
 # Preprocessing, sentence embeddings, clustering, and TF-IDF topic extraction.
+#
+# Heavy libraries (torch, transformers, sklearn) are imported lazily inside
+# functions so the FastAPI server can bind its port immediately on Render.
 
-from sentence_transformers import SentenceTransformer
-from sklearn.cluster import KMeans
-from sklearn.feature_extraction.text import TfidfVectorizer
-from better_profanity import profanity
-import numpy as np
 import re
 
-# Initialize profanity filter
-profanity.load_censor_words()
-
-# Lazy-load embedding model on first request (not at startup)
-# so the server can bind its port immediately on Render.
+# Lazy-loaded modules
+_profanity = None
 _embedder = None
+
+def _get_profanity():
+    global _profanity
+    if _profanity is None:
+        from better_profanity import profanity
+        profanity.load_censor_words()
+        _profanity = profanity
+    return _profanity
 
 def _get_embedder():
     global _embedder
     if _embedder is None:
+        from sentence_transformers import SentenceTransformer
         print("Loading sentence transformer model...")
         _embedder = SentenceTransformer('all-MiniLM-L6-v2')
         print("Model loaded!")
@@ -90,6 +94,7 @@ def _is_opinion_sentence(sent: str) -> bool:
 
 def extract_sentences(reviews: list) -> list:
     """Extract clean, English, opinion-based sentences from reviews."""
+    profanity = _get_profanity()
     sentences = []
 
     for review in reviews:
@@ -132,6 +137,9 @@ def cluster_sentences(sentences: list, n_clusters: int) -> list:
     Cluster sentences by semantic similarity using sentence embeddings.
     Returns list of (cluster_sentences, cluster_size) sorted by size.
     """
+    from sklearn.cluster import KMeans
+    import numpy as np
+
     if len(sentences) < n_clusters:
         n_clusters = max(2, len(sentences) // 2)
 
@@ -163,6 +171,8 @@ def extract_cluster_topic(cluster_sents: list, all_clusters: list) -> list:
     Use TF-IDF to find the distinctive keywords for a cluster
     compared to other clusters.
     """
+    from sklearn.feature_extraction.text import TfidfVectorizer
+
     documents = [" ".join(sents) for sents, _ in all_clusters]
 
     tfidf = TfidfVectorizer(
