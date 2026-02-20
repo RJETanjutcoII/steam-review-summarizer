@@ -11,10 +11,17 @@ import re
 # Initialize profanity filter
 profanity.load_censor_words()
 
-# Load embedding model at startup
-print("Loading sentence transformer model...")
-embedder = SentenceTransformer('all-MiniLM-L6-v2')
-print("Model loaded!")
+# Lazy-load embedding model on first request (not at startup)
+# so the server can bind its port immediately on Render.
+_embedder = None
+
+def _get_embedder():
+    global _embedder
+    if _embedder is None:
+        print("Loading sentence transformer model...")
+        _embedder = SentenceTransformer('all-MiniLM-L6-v2')
+        print("Model loaded!")
+    return _embedder
 
 # Extra stop words too generic for game review topic labels
 _STOP_WORDS = [
@@ -131,7 +138,7 @@ def cluster_sentences(sentences: list, n_clusters: int) -> list:
     if len(sentences) < 2:
         return [(sentences, len(sentences))]
 
-    embeddings = embedder.encode(sentences, show_progress_bar=False)
+    embeddings = _get_embedder().encode(sentences, show_progress_bar=False)
     embeddings = np.array(embeddings)
 
     kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
