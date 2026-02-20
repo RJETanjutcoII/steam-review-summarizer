@@ -37,6 +37,7 @@ async def summarize(app_id: str = Query(..., min_length=1)):
     }
 
 
+@app.head("/")
 @app.get("/")
 async def root():
     return {"status": "ok"}
