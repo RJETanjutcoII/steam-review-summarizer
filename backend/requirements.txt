@@ -2,7 +2,7 @@ fastapi
 uvicorn
 requests
 better-profanity
-sentence-transformers
+fastembed
 scikit-learn
 numpy
 python-dotenv

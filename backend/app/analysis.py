@@ -21,9 +21,9 @@ def _get_profanity():
 def _get_embedder():
     global _embedder
     if _embedder is None:
-        from sentence_transformers import SentenceTransformer
-        print("Loading sentence transformer model...")
-        _embedder = SentenceTransformer('all-MiniLM-L6-v2')
+        from fastembed import TextEmbedding
+        print("Loading embedding model...")
+        _embedder = TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
         print("Model loaded!")
     return _embedder
 
@@ -146,8 +146,7 @@ def cluster_sentences(sentences: list, n_clusters: int) -> list:
     if len(sentences) < 2:
         return [(sentences, len(sentences))]
 
-    embeddings = _get_embedder().encode(sentences, show_progress_bar=False)
-    embeddings = np.array(embeddings)
+    embeddings = np.array(list(_get_embedder().embed(sentences)))
 
     kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
     cluster_ids = kmeans.fit_predict(embeddings)
