@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import requests
 import os
 import re
+import time
 
 # Load environment variables
 load_dotenv()
@@ -32,21 +33,28 @@ def generate_summary(cluster_sents: list, keywords: list, polarity: str) -> str:
         f"Do NOT start with 'The game' or 'Players'. No period at the end."
     )
 
-    response = requests.post(
-        "https://openrouter.ai/api/v1/chat/completions",
-        headers={
-            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-            "Content-Type": "application/json",
-        },
-        json={
-            "model": OPENROUTER_MODEL,
-            "messages": [{"role": "user", "content": prompt}],
-            "max_tokens": 50,
-            "temperature": 0.3,
-        },
-        timeout=15,
-    )
-    response.raise_for_status()
+    for attempt in range(3):
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": OPENROUTER_MODEL,
+                "messages": [{"role": "user", "content": prompt}],
+                "max_tokens": 50,
+                "temperature": 0.3,
+            },
+            timeout=15,
+        )
+        if response.status_code == 429:
+            time.sleep(2 ** attempt)
+            continue
+        response.raise_for_status()
+        break
+    else:
+        return None
 
     data = response.json()
     if "choices" not in data:

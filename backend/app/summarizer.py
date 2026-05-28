@@ -40,7 +40,7 @@ def summarize_reviews_aggregate(pos_reviews: list, neg_reviews: list) -> dict:
             for sents, _ in pos_clusters
         ]
 
-        with ThreadPoolExecutor() as executor:
+        with ThreadPoolExecutor(max_workers=3) as executor:
             summaries = list(executor.map(_generate_for_cluster, tasks))
 
         seen = set()
@@ -61,7 +61,7 @@ def summarize_reviews_aggregate(pos_reviews: list, neg_reviews: list) -> dict:
             for sents, _ in neg_clusters
         ]
 
-        with ThreadPoolExecutor() as executor:
+        with ThreadPoolExecutor(max_workers=3) as executor:
             summaries = list(executor.map(_generate_for_cluster, tasks))
 
         seen = set()
