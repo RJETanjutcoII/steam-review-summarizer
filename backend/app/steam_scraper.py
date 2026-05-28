@@ -30,7 +30,7 @@ def search_games(query: str) -> list:
     return [{"appid": r["appid"], "name": r["name"]} for r in results]
 
 
-def get_reviews_by_id(app_id: str, max_reviews: int = 300):
+def get_reviews_by_id(app_id: str, max_reviews: int = 150):
     """
     Fetch positive and negative reviews for a specific Steam app ID.
     Paginates up to 3 pages (300 reviews) using Steam's cursor-based API.
