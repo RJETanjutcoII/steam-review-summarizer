@@ -9,7 +9,7 @@ import re
 # Load environment variables
 load_dotenv()
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-OPENROUTER_MODEL = "openrouter/owl-alpha"
+OPENROUTER_MODEL = "deepseek/deepseek-v4-flash:free"
 
 
 def generate_summary(cluster_sents: list, keywords: list, polarity: str) -> str:
@@ -49,6 +49,9 @@ def generate_summary(cluster_sents: list, keywords: list, polarity: str) -> str:
     response.raise_for_status()
 
     data = response.json()
+    if "choices" not in data:
+        print(f"OpenRouter error response: {data}")
+        return None
     summary = data["choices"][0]["message"]["content"].strip()
 
     # Clean up: take only the first line, strip markers/quotes/punctuation
