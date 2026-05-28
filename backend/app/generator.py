@@ -10,7 +10,7 @@ import time
 # Load environment variables
 load_dotenv()
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-OPENROUTER_MODEL = "deepseek/deepseek-v4-flash:free"
+OPENROUTER_MODEL = "deepseek/deepseek-v4-flash"
 
 
 def generate_summary(cluster_sents: list, keywords: list, polarity: str) -> str:
@@ -49,7 +49,7 @@ def generate_summary(cluster_sents: list, keywords: list, polarity: str) -> str:
             timeout=15,
         )
         if response.status_code == 429:
-            time.sleep(2 ** attempt)
+            time.sleep(0.5 * (attempt + 1))
             continue
         response.raise_for_status()
         break

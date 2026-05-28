@@ -31,16 +31,16 @@ def summarize_reviews_aggregate(pos_reviews: list, neg_reviews: list) -> dict:
     print(f"Extracted {len(pos_sentences)} positive, {len(neg_sentences)} negative sentences")
 
     if len(pos_sentences) >= 4:
-        n_pos = max(5, min(8, len(pos_sentences) // 20))
+        n_pos = max(3, min(5, len(pos_sentences) // 20))
         pos_clusters = cluster_sentences(pos_sentences, n_pos)
-        max_points = 3 if len(pos_sentences) < 30 else (5 if len(pos_sentences) >= 60 else 4)
+        max_points = 3 if len(pos_sentences) < 60 else 4
 
         tasks = [
             (sents, extract_cluster_topic(sents, pos_clusters), "positive")
             for sents, _ in pos_clusters
         ]
 
-        with ThreadPoolExecutor(max_workers=3) as executor:
+        with ThreadPoolExecutor() as executor:
             summaries = list(executor.map(_generate_for_cluster, tasks))
 
         seen = set()
@@ -52,16 +52,16 @@ def summarize_reviews_aggregate(pos_reviews: list, neg_reviews: list) -> dict:
                 result["praised"].append(summary)
 
     if len(neg_sentences) >= 4:
-        n_neg = max(3, min(8, len(neg_sentences) // 10))
+        n_neg = max(2, min(4, len(neg_sentences) // 10))
         neg_clusters = cluster_sentences(neg_sentences, n_neg)
-        max_points = 3 if len(neg_sentences) < 20 else (5 if len(neg_sentences) >= 40 else 4)
+        max_points = 3 if len(neg_sentences) < 40 else 4
 
         tasks = [
             (sents, extract_cluster_topic(sents, neg_clusters), "negative")
             for sents, _ in neg_clusters
         ]
 
-        with ThreadPoolExecutor(max_workers=3) as executor:
+        with ThreadPoolExecutor() as executor:
             summaries = list(executor.map(_generate_for_cluster, tasks))
 
         seen = set()
