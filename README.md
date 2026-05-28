@@ -19,12 +19,12 @@ AI-powered tool that distills hundreds of Steam user reviews into concise bullet
 ## How It Works
 
 1. Search for any game on Steam using the autocomplete dropdown
-2. The backend fetches up to 100 recent reviews from Steam's API
+2. The backend fetches up to 75 positive and 75 negative reviews separately from Steam's API, ensuring balanced input regardless of a game's overall rating skew
 3. Reviews are cleaned, filtered to opinion sentences, and encoded into semantic vectors using a neural embedding model
 4. K-Means clustering groups sentences by topic
-5. TF-IDF identifies the distinctive keywords for each cluster
+5. TF-IDF identifies the distinctive keywords for each cluster; non-game-related keywords are filtered out before reaching the LLM
 6. An LLM (via OpenRouter) generates a short phrase summarizing each cluster — all clusters are processed in parallel
-7. Vague or sentiment-mismatched outputs are filtered before the results are returned
+7. Vague, hallucinated, or sentiment-mismatched outputs are filtered before the results are returned
 
 ---
 
