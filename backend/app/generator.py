@@ -60,6 +60,8 @@ def generate_summary(cluster_sents: list, keywords: list, polarity: str) -> str:
     summary = summary.strip('"\'')
     summary = re.sub(r'\s+', ' ', summary).strip()
     summary = summary.rstrip('.')
+    if summary:
+        summary = summary[0].upper() + summary[1:]
 
     # If the model still crammed multiple items with dashes/separators, take the first
     if ' - ' in summary:
@@ -97,7 +99,7 @@ def _is_vague(summary: str) -> bool:
 
     # Generic phrases that say nothing about WHAT is good/bad
     vague_phrases = [
-        "enjoy the game", "recommend", "not worth", "waste of time",
+        "enjoy the game", "would recommend", "don't recommend", "not recommended", "not worth", "waste of time",
         "waste of money", "don't buy", "must buy", "must play",
         "great game", "bad game", "good game", "terrible game",
         "love this game", "hate this game", "best game", "worst game",

@@ -30,37 +30,45 @@ def search_games(query: str) -> list:
     return [{"appid": r["appid"], "name": r["name"]} for r in results]
 
 
-def get_reviews_by_id(app_id: str, num_reviews: int = 100):
+def get_reviews_by_id(app_id: str, max_reviews: int = 300):
     """
     Fetch positive and negative reviews for a specific Steam app ID.
-    Also fetches the game's name from the store API.
+    Paginates up to 3 pages (300 reviews) using Steam's cursor-based API.
 
     Returns: (pos_reviews, neg_reviews, game_name)
     """
-    # Get the game's name from Steam's store details API
     game_name = _get_game_name(app_id)
-
     base_url = f"https://store.steampowered.com/appreviews/{app_id}"
-    params = {
-        "json": 1,
-        "num_per_page": 100,
-        "filter": "recent",
-        "language": "english",
-    }
+    all_reviews = []
+    cursor = "*"
 
-    try:
-        resp = requests.get(base_url, params=params, timeout=10)
-        if resp.status_code != 200:
-            return [], [], game_name
-
-        all_reviews = resp.json().get("reviews", [])
-    except Exception:
-        return [], [], game_name
+    while len(all_reviews) < max_reviews:
+        params = {
+            "json": 1,
+            "num_per_page": 100,
+            "filter": "recent",
+            "language": "english",
+            "cursor": cursor,
+        }
+        try:
+            resp = requests.get(base_url, params=params, timeout=10)
+            if resp.status_code != 200:
+                break
+            data = resp.json()
+            page = data.get("reviews", [])
+            if not page:
+                break
+            all_reviews.extend(page)
+            cursor = data.get("cursor", "")
+            if not cursor or len(page) < 100:
+                break
+        except Exception:
+            break
 
     pos_reviews = [r["review"] for r in all_reviews if r.get("voted_up")]
     neg_reviews = [r["review"] for r in all_reviews if not r.get("voted_up")]
 
-    return pos_reviews[:num_reviews], neg_reviews[:num_reviews], game_name
+    return pos_reviews[:max_reviews], neg_reviews[:max_reviews], game_name
 
 
 def _get_game_name(app_id: str) -> str:
