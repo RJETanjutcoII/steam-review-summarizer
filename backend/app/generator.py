@@ -23,13 +23,13 @@ def generate_summary(cluster_sents: list, keywords: list, polarity: str) -> str:
     keyword_str = ", ".join(keywords[:3]) if keywords else "general"
     action = "love about" if sentiment == "positive" else "hate about"
     prompt = (
-        f"Topic keywords: {keyword_str}\n"
-        f"Reviews: {' | '.join(sample)}\n\n"
-        f"Write a short phrase (under 8 words) describing what players {action} this game, focused on the topic keywords above. "
-        f"Rules: ONE phrase only. Name a specific game feature (e.g. combat, story, graphics, music, maps, performance, UI). "
-        f"Write it as a direct description, NOT as commentary about reviews. "
-        f"Bad examples: 'Reputation praised', 'Fun not criticized', 'Players enjoy gameplay'. "
-        f"Good examples: 'Addictive class-based combat', 'Rampant cheating ruins matches'. "
+        f"Reviews: {' | '.join(sample)}\n"
+        f"Focus topic: {keyword_str}\n\n"
+        f"Based only on the reviews above, write a short phrase (under 8 words) describing what players {action} about this game. "
+        f"Rules: ONE phrase only. Describe a specific game feature visible in the reviews (e.g. combat, graphics, music, maps, performance). "
+        f"Do NOT copy words or phrases verbatim from the reviews. Do NOT describe aspects not mentioned in the reviews. "
+        f"Bad: 'Said giant laggy radius', 'Reputation praised', 'Expansive masterpiece story', 'Players enjoy gameplay'. "
+        f"Good: 'Addictive class-based combat', 'Rampant bot infestation ruins matches', 'Satisfying weapon variety'. "
         f"No dashes, bullets, quotes, or period at the end."
     )
 
@@ -65,6 +65,10 @@ def generate_summary(cluster_sents: list, keywords: list, polarity: str) -> str:
     if ' - ' in summary:
         summary = summary.split(' - ')[0].strip()
 
+    # Reject outputs that look like verbatim review fragments.
+    if _is_artifact(summary):
+        return None
+
     # Reject vague summaries that don't mention a specific game aspect.
     if _is_vague(summary):
         return None
@@ -75,6 +79,12 @@ def generate_summary(cluster_sents: list, keywords: list, polarity: str) -> str:
         return None
 
     return summary
+
+
+def _is_artifact(summary: str) -> bool:
+    lower = summary.lower()
+    artifact_starts = ["said ", "says ", "very ", "so ", "i ", "you ", "we ", "they "]
+    return any(lower.startswith(s) for s in artifact_starts)
 
 
 def _is_vague(summary: str) -> bool:
@@ -113,6 +123,7 @@ def _wrong_sentiment(summary: str, polarity: str) -> bool:
         "repetitive", "grindy", "clunky", "outdated", "dated",
         "overpriced", "abandoned", "toxic", "unfair", "poor",
         "fails", "failure", "disappointing", "uninspired",
+        "lag", "laggy", "stutter", "fps", "slow", "freeze",
     ]
 
     # Words/phrases that signal positive sentiment
