@@ -20,7 +20,8 @@ def generate_summary(cluster_sents: list, keywords: list, polarity: str) -> str:
     sample = cluster_sents[:8]
     sentiment = "positive" if polarity == "positive" else "negative"
 
-    keyword_str = ", ".join(keywords[:3]) if keywords else "general"
+    filtered_keywords = [k for k in keywords if _is_game_related(k)]
+    keyword_str = ", ".join(filtered_keywords[:3]) if filtered_keywords else "general"
     action = "love about" if sentiment == "positive" else "hate about"
     prompt = (
         f"Reviews: {' | '.join(sample)}\n"
@@ -67,20 +68,35 @@ def generate_summary(cluster_sents: list, keywords: list, polarity: str) -> str:
     if ' - ' in summary:
         summary = summary.split(' - ')[0].strip()
 
-    # Reject outputs that look like verbatim review fragments.
     if _is_artifact(summary):
         return None
 
-    # Reject vague summaries that don't mention a specific game aspect.
     if _is_vague(summary):
         return None
 
-    # Reject summaries whose sentiment contradicts the polarity.
-    # e.g. "Alt-tabbing causes crashes" should NOT appear as praise.
     if _wrong_sentiment(summary, polarity):
         return None
 
     return summary
+
+
+_GAME_VOCAB = {
+    "gameplay", "graphics", "music", "soundtrack", "story", "narrative", "plot",
+    "combat", "controls", "mechanics", "mechanic", "difficulty", "performance",
+    "characters", "character", "dialogue", "writing", "art", "animation",
+    "multiplayer", "singleplayer", "community", "content", "levels", "maps",
+    "weapons", "classes", "abilities", "skills", "progression", "leveling",
+    "bugs", "crashes", "optimization", "fps", "lag", "loading",
+    "price", "dlc", "microtransactions", "replayability", "pacing", "atmosphere",
+    "voice", "puzzle", "puzzles", "platforming", "movement", "exploration",
+    "lore", "world", "ending", "choices", "soundtrack", "boss", "bosses",
+    "cheaters", "bots", "servers", "matchmaking", "updates", "developers",
+}
+
+
+def _is_game_related(keyword: str) -> bool:
+    lower = keyword.lower()
+    return any(vocab_word in lower for vocab_word in _GAME_VOCAB)
 
 
 def _is_artifact(summary: str) -> bool:

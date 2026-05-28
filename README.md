@@ -6,6 +6,16 @@ AI-powered tool that distills hundreds of Steam user reviews into concise bullet
 
 ---
 
+## Screenshots
+
+![Team Fortress 2 Review](assets/tf2.png)
+
+![Dishonored 2 Review](assets/dishonored2.png)
+
+![Plants vs. Zombies Review](assets/pvz.png)
+
+---
+
 ## How It Works
 
 1. Search for any game on Steam using the autocomplete dropdown
