@@ -9,7 +9,7 @@ import re
 # Load environment variables
 load_dotenv()
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-OPENROUTER_MODEL = "arcee-ai/trinity-large-preview:free"
+OPENROUTER_MODEL = "meta-llama/llama-3.1-8b-instruct:free"
 
 
 def generate_summary(cluster_sents: list, keywords: list, polarity: str) -> str:
