@@ -60,7 +60,10 @@ def generate_summary(cluster_sents: list, keywords: list, polarity: str) -> str:
     if "choices" not in data:
         print(f"OpenRouter error response: {data}")
         return None
-    summary = data["choices"][0]["message"]["content"].strip()
+    content = data["choices"][0]["message"]["content"]
+    if not content:
+        return None
+    summary = content.strip()
 
     # Clean up: take only the first line, strip markers/quotes/punctuation
     summary = summary.split('\n')[0].strip()
