@@ -49,6 +49,8 @@ def generate_summary(cluster_sents: list, keywords: list, polarity: str) -> str:
     response.raise_for_status()
 
     data = response.json()
+    if "choices" not in data or not data["choices"][0]["message"]["content"]:
+        return None
     summary = data["choices"][0]["message"]["content"].strip()
 
     # Clean up: take only the first line, strip markers/quotes/punctuation
