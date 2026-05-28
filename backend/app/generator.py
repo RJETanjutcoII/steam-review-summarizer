@@ -26,7 +26,7 @@ def generate_summary(cluster_sents: list, keywords: list, polarity: str) -> str:
         f"Reviews: {' | '.join(sample)}\n"
         f"Focus topic: {keyword_str}\n\n"
         f"Based only on the reviews above, write a short phrase (under 8 words) describing what players {action} about this game. "
-        f"Rules: ONE phrase only. Describe a specific game feature visible in the reviews (e.g. combat, graphics, music, maps, performance). "
+        f"Rules: ONE phrase only. Describe a specific game feature visible in the reviews (e.g. story, writing, art style, music, mechanics, controls, difficulty, characters, performance). "
         f"Do NOT copy words or phrases verbatim from the reviews. Do NOT describe aspects not mentioned in the reviews. "
         f"Bad: 'Said giant laggy radius', 'Reputation praised', 'Expansive masterpiece story', 'Players enjoy gameplay'. "
         f"Good: 'Addictive class-based combat', 'Rampant bot infestation ruins matches', 'Satisfying weapon variety'. "

@@ -75,6 +75,7 @@ def _is_opinion_sentence(sent: str) -> bool:
             return False
 
     opinion_words = [
+        # Generic game quality
         "game", "gameplay", "graphics", "music", "soundtrack", "story",
         "combat", "controls", "fun", "boring", "great", "terrible",
         "best", "worst", "amazing", "awful", "good", "bad", "love",
@@ -84,9 +85,26 @@ def _is_opinion_sentence(sent: str) -> bool:
         "beautiful", "ugly", "dated", "classic", "unique",
         "repetitive", "challenging", "easy", "difficult",
         "multiplayer", "singleplayer", "players", "community",
-        "update", "abandoned", "developers", "valve",
-        "bots", "cheaters", "hackers", "f2p", "free",
-        "classes", "weapons", "maps", "content",
+        "update", "abandoned", "developers", "content",
+        # RPG / narrative
+        "dialogue", "character", "characters", "writing", "narrative",
+        "plot", "ending", "choices", "progression", "leveling",
+        "lore", "world", "atmosphere", "immersive", "pacing",
+        "cutscene", "voice acting", "voiced", "branching",
+        # Visual novel / adventure
+        "art", "art style", "artwork", "sprites", "cg", "visual",
+        "route", "routes", "romance", "endings", "reading",
+        # Puzzle / strategy
+        "puzzle", "puzzles", "mechanics", "mechanic", "strategy",
+        "tactics", "difficulty", "level design", "levels",
+        "satisfying", "clever", "intuitive", "obtuse",
+        # Platformer / action
+        "movement", "jumping", "platforming", "hitbox", "responsive",
+        "fluid", "tight", "sluggish", "animation", "feel",
+        # General experience
+        "price", "hours", "replayability", "replay", "grind",
+        "microtransaction", "dlc", "performance", "optimization",
+        "crash", "bug", "bugs", "lag", "fps", "loading",
     ]
 
     return sum(1 for w in opinion_words if w in lower) >= 1
