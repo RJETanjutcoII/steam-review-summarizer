@@ -18,18 +18,19 @@ def generate_summary(cluster_sents: list, keywords: list, polarity: str) -> str:
     from a cluster's representative sentences and TF-IDF keywords.
     """
     sample = cluster_sents[:8]
-    keyword_str = ", ".join(keywords[:3]) if keywords else "general"
-
     sentiment = "positive" if polarity == "positive" else "negative"
 
+    keyword_str = ", ".join(keywords[:3]) if keywords else "general"
+    action = "love about" if sentiment == "positive" else "hate about"
     prompt = (
-        f"These {sentiment} game reviews mention: {keyword_str}\n"
+        f"Topic keywords: {keyword_str}\n"
         f"Reviews: {' | '.join(sample)}\n\n"
-        f"Respond with ONLY a single short phrase (under 8 words) summarizing the {sentiment} sentiment about {keyword_str}. "
-        f"Rules: ONE phrase only. No dashes, no bullet points, no lists, no quotes, no explanation. "
-        f"Must name a specific game aspect (e.g. combat, story, graphics, music, maps, UI, performance). "
-        f"NEVER use vague phrases like 'enjoy the game', 'recommend', 'not worth it', or 'waste of time'. "
-        f"Do NOT start with 'The game' or 'Players'. No period at the end."
+        f"Write a short phrase (under 8 words) describing what players {action} this game, focused on the topic keywords above. "
+        f"Rules: ONE phrase only. Name a specific game feature (e.g. combat, story, graphics, music, maps, performance, UI). "
+        f"Write it as a direct description, NOT as commentary about reviews. "
+        f"Bad examples: 'Reputation praised', 'Fun not criticized', 'Players enjoy gameplay'. "
+        f"Good examples: 'Addictive class-based combat', 'Rampant cheating ruins matches'. "
+        f"No dashes, bullets, quotes, or period at the end."
     )
 
     response = requests.post(
