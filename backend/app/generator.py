@@ -136,13 +136,11 @@ def _wrong_sentiment(summary: str, polarity: str) -> bool:
     ]
 
     if polarity == "positive":
-        # If it's supposed to be praise but sounds negative, reject it
         neg_hits = sum(1 for w in negative_signals if w in lower)
         pos_hits = sum(1 for w in positive_signals if w in lower)
-        return neg_hits > 0 and pos_hits == 0
+        return neg_hits >= 2 and pos_hits == 0
 
     else:
-        # If it's supposed to be criticism but sounds positive, reject it
         pos_hits = sum(1 for w in positive_signals if w in lower)
         neg_hits = sum(1 for w in negative_signals if w in lower)
-        return pos_hits > 0 and neg_hits == 0
+        return pos_hits >= 2 and neg_hits == 0
