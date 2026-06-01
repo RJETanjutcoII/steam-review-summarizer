@@ -3,8 +3,7 @@ import SearchBar from './components/SearchBar'
 import LoadingSpinner from './components/LoadingSpinner'
 import ResultDisplay from './components/ResultDisplay'
 import './App.css'
-
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+import { API_BASE } from './config'
 
 function App() {
   const [loading, setLoading] = useState(false)

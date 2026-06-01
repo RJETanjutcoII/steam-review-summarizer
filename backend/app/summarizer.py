@@ -28,8 +28,6 @@ def summarize_reviews_aggregate(pos_reviews: list, neg_reviews: list) -> dict:
     pos_sentences = extract_sentences(pos_reviews)
     neg_sentences = extract_sentences(neg_reviews)
 
-    print(f"Extracted {len(pos_sentences)} positive, {len(neg_sentences)} negative sentences")
-
     if len(pos_sentences) >= 4:
         n_pos = max(3, min(5, len(pos_sentences) // 10))
         pos_clusters = cluster_sentences(pos_sentences, n_pos)

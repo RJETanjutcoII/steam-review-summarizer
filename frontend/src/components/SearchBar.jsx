@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import './SearchBar.css'
-
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+import { API_BASE } from '../config'
 
 function SearchBar({ onSearch, loading }) {
   const [query, setQuery] = useState('')
@@ -71,7 +70,7 @@ function SearchBar({ onSearch, loading }) {
     e.preventDefault()
     setShowDropdown(false)
     if (selectedGame) {
-      onSearch(selectedGame.appid, selectedGame.name)
+      onSearch(selectedGame.appid)
     }
   }
 

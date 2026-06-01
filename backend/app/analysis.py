@@ -1,7 +1,7 @@
 # app/analysis.py
 # Preprocessing, sentence embeddings, clustering, and TF-IDF topic extraction.
 #
-# Heavy libraries (torch, transformers, sklearn) are imported lazily inside
+# Heavy libraries (fastembed, sklearn) are imported lazily inside
 # functions so the FastAPI server can bind its port immediately on Render.
 
 import re
@@ -22,9 +22,7 @@ def _get_embedder():
     global _embedder
     if _embedder is None:
         from fastembed import TextEmbedding
-        print("Loading embedding model...")
         _embedder = TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
-        print("Model loaded!")
     return _embedder
 
 # Extra stop words too generic for game review topic labels
